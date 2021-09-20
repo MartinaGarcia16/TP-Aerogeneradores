@@ -53,6 +53,7 @@ def crearPoblacionInicial():
                 #comprobar que no esté en el array de indices
                 ocupado = verificarIndices(indices,filaElegida,columnaElegida)
                 #comprobar que no haya dos molinos juntos(teniendo en cuenta que el vento viene de izq a der)
+                #Esta comprobacion se puede sacar/ preguntar al profe
                 molinosJuntos = verificarMolinosJuntos(ma,columnaElegida,filaElegida,i)
                 if ocupado==False and molinosJuntos==False:
                     aux=1
