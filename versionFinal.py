@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import openpyxl as xlsx
 import xlsxwriter
+import matplotlib.pyplot as plt
 
 vientoInicial= 7 #m/s
 radioRotor=63 #m
@@ -303,9 +304,15 @@ def tabla_cromosoma(cromosoma_optimo):
     df = df.T
     with pd.ExcelWriter(ruta) as writer:
         df.to_excel(writer, sheet_name='TP 1', index=False)   
-    print(df)
-
     
+
+def graficar(promedios,maximos,minimos):
+    plt.plot(promedios,'g', label = "Promedios")
+    plt.plot(maximos,'r',  label = "Maximos")
+    plt.plot(minimos,'m' ,label = "Minimos")
+    plt.legend(loc="lower right")
+    plt.show()
+
 #------------------------------------------------------------------------------------------------------------
 #Crea cromosoma optimo matrix 10x10 vacio
 for fila in range(10):
@@ -339,4 +346,5 @@ mostrarMolinos(cromosoma_optimo)
 tabla()
 #tabla excel con matriz mejor cromosoma
 tabla_cromosoma(cromosoma_optimo)
-   
+#Gráficas de max,min y prom
+graficar(promedios,maximos,minimos)
