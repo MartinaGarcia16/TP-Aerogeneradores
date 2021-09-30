@@ -1,6 +1,9 @@
 
 import random
 import math
+import pandas as pd
+import numpy as np
+
 vientoInicial= 7 #m/s
 radioRotor=63 #m
 distanciaminima=315 #5*radioRotor
@@ -9,7 +12,7 @@ rugosidadSuperficial=0.694 #m
 alfa= 0.0975
 listaFObjetivo=[]
 listaFitness=[]
-ciclos=1
+ciclos=100
 prob_crossover=0.75
 prob_mutacion=0.05
 
@@ -29,6 +32,8 @@ class Casillero():
         self.viento=viento
     def setHayGenerador(self,a):
         self.HayGenerador=a
+    def getBin():
+        return bin
 
 def rellenarPoblacionInicial(cantCromosomas):
     poblacion = []
@@ -213,7 +218,10 @@ def crossover(p1,p2):
                 for f in range(10):
                     if p2[f][c].HayGenerador:
                         hijo2[f][c].setHayGenerador(True)
-    print('hijo 1')
+    else: 
+        hijo1=p1
+        hijo2=p2
+    '''print('hijo 1')
     for fila in range(10):
         print("")
         for columna in range(10):
@@ -228,7 +236,7 @@ def crossover(p1,p2):
             if(hijo2[fila][columna].HayGenerador):
                 print("[ X ]", end="")
             else:
-                print("[   ]", end="")
+                print("[   ]", end="")'''
     return hijo1, hijo2
 def mutacion(padre):
     fila=random.randint(0,9)
@@ -251,33 +259,65 @@ def crossoverYmutacion():
         nuevaPoblacion.append(p1)
         nuevaPoblacion.append(p2)   
     return nuevaPoblacion
+
+def tabla():
+    generacion = np.arange(1, ciclos + 1)
+    
+    ######## TABLA EXCEL ########
+    Datos = pd.DataFrame({"Generacion": generacion, "Minimo FO": minimos, "Maximo FO": maximos, "Promedio FO": promedios})  
+    Tabla = pd.ExcelWriter('C:\\Users\\PATRI\\Desktop\\Tabla.xlsx', engine='xlsxwriter') 
+    Datos.to_excel(Tabla, sheet_name='Valores', index = False)     
+
+    workbook = Tabla.book
+    worksheet = Tabla.sheets["Valores"] 
+
+    formato = workbook.add_format({"align": "center"})
+
+    worksheet.set_column("A:D", 15, formato)  
+    worksheet.conditional_format("D1:DF"+str(len(promedios)+1), {"type": "3_color_scale", "max_color": "green", "mid_color": "yellow", "min_color": "red"})
+
+    Tabla.save()
 #------------------------------------------------------------------------------------------------------------
+
+minimos=[]
+maximos=[]
+promedios=[]
+cromosoma_optimo=[]
+max_potencia=0 #del cromosoma optimo
+
 poblacion=rellenarPoblacionInicial(50)
-print("poblacion inicial")
+'''print("poblacion inicial")
 for x in range(50):
-    print('molino: ',x+1)
-    mostrarMolinos(poblacion[x])
+    print('Cromosoma: ',x+1)
+    mostrarMolinos(poblacion[x])'''
 
 for _ in range(ciclos):
-
     for x in range(50):
         calcularPotenciasYvientos(poblacion[x])
 
-    listaFObjetivo,listaFitness=FuncionObjetivoyFitness(poblacion)  
+    listaFObjetivo,listaFitness=FuncionObjetivoyFitness(poblacion) 
+    max_p=max(listaFObjetivo) #potencia de mejor cromosoma
+    minimos.append(min(listaFObjetivo))
+    maximos.append(max_p)
+    indice = listaFObjetivo.index(max_p)
+    optimo = poblacion[indice]
+    promedios.append(np.mean(listaFObjetivo))
+    if (max_p > max_potencia) or (max_potencia == 0):
+        max_potencia = max_p
 
-    print('funcion ojetivo')
+
+    '''print('lista funcion ojetivo')
     print(listaFObjetivo)
-    print('fitness')
-    print(listaFitness)
+    print('lista fitness')
+    print(listaFitness)'''
 
     poblacion=crossoverYmutacion()
+tabla()
 
-    for x in range(50):
+'''for x in range(50):
         print('molino: ',x+1)
-        mostrarMolinos(poblacion[x])
+        mostrarMolinos(poblacion[x])'''
 
-    
 
-    
 
     
