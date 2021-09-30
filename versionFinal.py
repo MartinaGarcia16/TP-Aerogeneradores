@@ -3,6 +3,8 @@ import random
 import math
 import pandas as pd
 import numpy as np
+import openpyxl as xlsx
+import xlsxwriter
 
 vientoInicial= 7 #m/s
 radioRotor=63 #m
@@ -15,6 +17,15 @@ listaFitness=[]
 ciclos=100
 prob_crossover=0.75
 prob_mutacion=0.05
+minimos=[]
+maximos=[]
+promedios=[]
+#cromosoma_optimo=[]
+max_potencia=0 #del cromosoma optimo
+max_p=0
+cromosoma_optimo=[]
+ruta='C:\\Users\\PATRI\\Desktop\\Tabla2.xlsx'
+ma2=np.zeros((10, 10))
 
 class Casillero():
     generador = None
@@ -32,9 +43,7 @@ class Casillero():
         self.viento=viento
     def setHayGenerador(self,a):
         self.HayGenerador=a
-    def getBin():
-        return bin
-
+    
 def rellenarPoblacionInicial(cantCromosomas):
     poblacion = []
 
@@ -74,6 +83,15 @@ def mostrarMolinos(matriz):
                 print("[   ]", end="")
     print()
 
+def convertir_matriz(ma):
+    for fila in range(10):
+        for columna in range(10):
+            if(ma[fila][columna].HayGenerador):
+                ma2[fila][columna]=1
+            else:
+                ma2[fila][columna]=0
+
+               
 def calcularPotencia(viento):
     potencia=0
     if viento >=3 and viento <5:
@@ -277,47 +295,48 @@ def tabla():
     worksheet.conditional_format("D1:DF"+str(len(promedios)+1), {"type": "3_color_scale", "max_color": "green", "mid_color": "yellow", "min_color": "red"})
 
     Tabla.save()
+    
+def tabla_cromosoma(cromosoma_optimo):
+    convertir_matriz(cromosoma_optimo)
+    print(ma2)
+    df=pd.DataFrame(ma2)
+    df = df.T
+    with pd.ExcelWriter(ruta) as writer:
+        df.to_excel(writer, sheet_name='TP 1', index=False)   
+    print(df)
+
+    
 #------------------------------------------------------------------------------------------------------------
-
-minimos=[]
-maximos=[]
-promedios=[]
-cromosoma_optimo=[]
-max_potencia=0 #del cromosoma optimo
-
+#Crea cromosoma optimo matrix 10x10 vacio
+for fila in range(10):
+            renglon = []
+            for columna in range(10):
+                renglon.append(Casillero(fila, columna))
+            cromosoma_optimo.append(renglon)
+#Crea pob inicial random
 poblacion=rellenarPoblacionInicial(50)
-'''print("poblacion inicial")
-for x in range(50):
-    print('Cromosoma: ',x+1)
-    mostrarMolinos(poblacion[x])'''
 
 for _ in range(ciclos):
     for x in range(50):
         calcularPotenciasYvientos(poblacion[x])
-
-    listaFObjetivo,listaFitness=FuncionObjetivoyFitness(poblacion) 
+    listaFObjetivo,listaFitness=FuncionObjetivoyFitness(poblacion)
     max_p=max(listaFObjetivo) #potencia de mejor cromosoma
-    minimos.append(min(listaFObjetivo))
+    minimos.append(min(listaFObjetivo)) 
     maximos.append(max_p)
     indice = listaFObjetivo.index(max_p)
     optimo = poblacion[indice]
     promedios.append(np.mean(listaFObjetivo))
+    #Valida si la potencia es la mejor obtenida hasta el momento
     if (max_p > max_potencia) or (max_potencia == 0):
         max_potencia = max_p
-
-
-    '''print('lista funcion ojetivo')
-    print(listaFObjetivo)
-    print('lista fitness')
-    print(listaFitness)'''
+        cromosoma_optimo=optimo
 
     poblacion=crossoverYmutacion()
+
+#Muestra la mejor distribución del parque
+mostrarMolinos(cromosoma_optimo)
+#Tabla excel
 tabla()
-
-'''for x in range(50):
-        print('molino: ',x+1)
-        mostrarMolinos(poblacion[x])'''
-
-
-
-    
+#tabla excel con matriz mejor cromosoma
+tabla_cromosoma(cromosoma_optimo)
+   
