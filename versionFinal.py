@@ -1,4 +1,3 @@
-
 import random
 import math
 import pandas as pd
@@ -25,8 +24,9 @@ promedios=[]
 max_potencia=0 #del cromosoma optimo
 max_p=0
 cromosoma_optimo=[]
-ruta='C:\\Users\\PATRI\\Desktop\\Tabla2.xlsx'
+ruta='C:\\Users\\Usuario\\Desktop\\Tabla2.xlsx'
 ma2=np.zeros((10, 10))
+cant_generadores_max = 25
 
 class Casillero():
     generador = None
@@ -84,6 +84,21 @@ def mostrarMolinos(matriz):
                 print("[   ]", end="")
     print()
 
+def mostrarPotencia(matriz):
+    print("molinos")
+    ma=np.zeros((10, 10))
+    for fila in range(10):
+        #print("")
+        for columna in range(10):
+            if(matriz[fila][columna].HayGenerador):
+                ma[fila][columna]=matriz[fila][columna].potenciaGenerada
+                #print(matriz[fila][columna].potenciaGenerada, end=" ")
+            else:
+                ma[fila][columna]=matriz[fila][columna].potenciaGenerada
+                #print(matriz[fila][columna].potenciaGenerada, end=" ")
+    #print()
+    return ma
+
 def convertir_matriz(ma):
     for fila in range(10):
         for columna in range(10):
@@ -91,8 +106,17 @@ def convertir_matriz(ma):
                 ma2[fila][columna]=1
             else:
                 ma2[fila][columna]=0
+    return ma2
 
-               
+def convertir_matriz_p(ma):
+    for fila in range(10):
+        for columna in range(10):
+            if(ma[fila][columna] != 0):
+                ma2[fila][columna]=ma[fila][columna]
+            else:
+                ma2[fila][columna]=0
+    return ma2
+
 def calcularPotencia(viento):
     potencia=0
     if viento >=3 and viento <5:
@@ -257,6 +281,7 @@ def crossover(p1,p2):
             else:
                 print("[   ]", end="")'''
     return hijo1, hijo2
+
 def mutacion(padre):
     fila=random.randint(0,9)
     columna=random.randint(0,9)
@@ -279,12 +304,39 @@ def crossoverYmutacion():
         nuevaPoblacion.append(p2)   
     return nuevaPoblacion
 
+def contarGeneradores(parque):
+    nro_generadores = 0
+    for i in range(10):
+        for j in range(10):
+            if parque[i][j] != 0:
+                nro_generadores += 1
+
+    return nro_generadores
+
+def corregirParque(parque, cant_generadores_parque):
+    ma=np.zeros((10, 10))
+    nro_generadores_a_borrar = cant_generadores_parque - cant_generadores_max
+    aux=parque[0][0]
+    for _ in range(nro_generadores_a_borrar):
+        '''while(aux == 0):
+            for i in range(10):
+                for j in range(10):
+                    aux=parque[i][j]'''
+        for i in range(10):
+            for j in range(10):
+                if parque[i][j] < aux and parque[i][j]!= 0 :
+                    ma[i][j]=0
+                else:
+                    ma[i][j]=parque[i][j]
+                aux=parque[i][j]
+    return ma
+
 def tabla():
     generacion = np.arange(1, ciclos + 1)
     
     ######## TABLA EXCEL ########
     Datos = pd.DataFrame({"Generacion": generacion, "Minimo FO": minimos, "Maximo FO": maximos, "Promedio FO": promedios})  
-    Tabla = pd.ExcelWriter('C:\\Users\\PATRI\\Desktop\\Tabla.xlsx', engine='xlsxwriter') 
+    Tabla = pd.ExcelWriter('C:\\Users\\Usuario\\Desktop\\Tabla.xlsx', engine='xlsxwriter') 
     Datos.to_excel(Tabla, sheet_name='Valores', index = False)     
 
     workbook = Tabla.book
@@ -298,14 +350,13 @@ def tabla():
     Tabla.save()
     
 def tabla_cromosoma(cromosoma_optimo):
-    convertir_matriz(cromosoma_optimo)
-    print(ma2)
+    ma2=convertir_matriz(cromosoma_optimo)
+    print("ma2",ma2)
     df=pd.DataFrame(ma2)
     df = df.T
     with pd.ExcelWriter(ruta) as writer:
         df.to_excel(writer, sheet_name='TP 1', index=False)   
     
-
 def graficar(promedios,maximos,minimos):
     plt.plot(promedios,'g', label = "Promedios")
     plt.plot(maximos,'r',  label = "Maximos")
@@ -316,10 +367,10 @@ def graficar(promedios,maximos,minimos):
 #------------------------------------------------------------------------------------------------------------
 #Crea cromosoma optimo matrix 10x10 vacio
 for fila in range(10):
-            renglon = []
-            for columna in range(10):
-                renglon.append(Casillero(fila, columna))
-            cromosoma_optimo.append(renglon)
+    renglon = []
+    for columna in range(10):
+        renglon.append(Casillero(fila, columna))
+    cromosoma_optimo.append(renglon)
 #Crea pob inicial random
 poblacion=rellenarPoblacionInicial(50)
 
@@ -346,5 +397,16 @@ mostrarMolinos(cromosoma_optimo)
 tabla()
 #tabla excel con matriz mejor cromosoma
 tabla_cromosoma(cromosoma_optimo)
+
+matriz_potencias= mostrarPotencia(cromosoma_optimo)
+print("mp",matriz_potencias)
+#print(matriz_potencias)
+parque=convertir_matriz(cromosoma_optimo)
+cant_generadores = contarGeneradores(parque)
+print(cant_generadores)
+if(cant_generadores>cant_generadores_max): 
+    cromosoma_cambiado= corregirParque(matriz_potencias,cant_generadores)
+    print(cromosoma_cambiado)
 #Gráficas de max,min y prom
 graficar(promedios,maximos,minimos)
+
