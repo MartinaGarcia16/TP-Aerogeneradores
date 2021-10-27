@@ -261,7 +261,7 @@ def corregirParque(parque, cant_generadores_parque):
     while(aux<nro_generadores_a_borrar):
         fila=random.randint(0,9)
         columna=random.randint(0,9)
-        if parque[fila][columna].HayGenerador:
+        if parque[fila][columna].HayGenerador and parque[fila][columna].potenciaGenerada <=404:
             parque[fila][columna].setHayGenerador(False)
             aux=aux+1
     return parque
@@ -275,13 +275,12 @@ def crossoverYmutacion():
         p1,p2= crossover(p1,p2)
         p1=mutacion(p1)
         p2=mutacion(p2)
-        cant1=contar_generadores(p1)
+        '''cant1=contar_generadores(p1)
         cant2=contar_generadores(p2)
-
         if cant1>25:
            p1= corregirParque(p1,cant1)
         if cant2>25:
-            p2=corregirParque(p2,cant2)
+            p2=corregirParque(p2,cant2)'''
 
         nuevaPoblacion.append(p1)
         nuevaPoblacion.append(p2)   
@@ -317,11 +316,11 @@ poblacion=rellenarPoblacionInicial(50)
 for x in range(50):
     print('Cromosoma: ',x+1)
     mostrarMolinos(poblacion[x])'''
-
-for w in range(ciclos):
-    for x in range(50):
+for x in range(50):
         calcularPotenciasYvientos(poblacion[x])
-
+for w in range(ciclos):
+    print(w)
+    
     listaFObjetivo,listaFitness=FuncionObjetivoyFitness(poblacion) 
     max_p=max(listaFObjetivo) #potencia de mejor cromosoma
     minimos.append(min(listaFObjetivo))
@@ -333,13 +332,15 @@ for w in range(ciclos):
         max_potencia = max_p
         optimo2=optimo
 
-
-    '''print('lista funcion ojetivo')
-    print(listaFObjetivo)
-    print('lista fitness')
-    print(listaFitness)'''
-
     poblacion=crossoverYmutacion()
+    for x in range(50):
+        calcularPotenciasYvientos(poblacion[x])
+    for j in range(50):
+        cant= contar_generadores(poblacion[j])
+        if (cant>25):
+            poblacion[j]=corregirParque(poblacion[j],cant)
+    
+
 tabla()
 print("mejor parque eolico")
 mostrarMolinos(optimo2)
