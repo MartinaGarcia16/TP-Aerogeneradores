@@ -19,7 +19,7 @@ rugosidadSuperficial=0.694 #m
 alfa= 0.0975
 listaFObjetivo=[]
 listaFitness=[]
-ciclos=50
+ciclos=100
 prob_crossover=0.75
 prob_mutacion=0.05
 
@@ -314,6 +314,13 @@ def tabla():
 
     Tabla.save()
 #------------------------------------------------------------------------------------------------------------
+def graficar(promedios,maximos,minimos):
+    plt.plot(promedios,'g', label = "Promedios")
+    plt.plot(maximos,'r',  label = "Maximos")
+    plt.plot(minimos,'m' ,label = "Minimos")
+    plt.legend(loc="lower right")
+    plt.show()
+
 def convertir_matriz(ma):
     ma2=np.zeros((10, 10))
     for fila in range(10):
@@ -502,6 +509,7 @@ print(contar_generadores(optimo2))
 
 parque = convertir_matriz(optimo2)
 print(parque)
+graficar(promedios,maximos,minimos)
 grafico_3d(parque)
 cuadricula(parque)
 '''for x in range(50):
